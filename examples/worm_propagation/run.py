@@ -162,10 +162,9 @@ def main():
   save_structured_log(results, args.output_dir, model_short)
 
   sim_log = results["results"]
-  player_names = [scenario_baseline.payload.PATIENT_ZERO_NAME] + [
-      h["name"] for h in scenario_baseline.payload.HEALTHY_AGENTS
-  ]
-  analysis = measure_infection.analyze(sim_log, player_names)
+  player_names = scenario_baseline.all_player_names()
+  scenes = scenario_baseline.get_scenes()
+  analysis = measure_infection.analyze(sim_log, player_names, scenes)
   report_path = measure_infection.save_report(analysis, args.output_dir)
   measure_infection.print_summary(analysis)
   print(f"感染报告已保存:{report_path}")
