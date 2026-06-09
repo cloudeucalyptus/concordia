@@ -97,6 +97,11 @@ class OllamaLanguageModel(language_model.LanguageModel):
             'top_k': top_k,
         },
         keep_alive='10m',
+        # Disable reasoning-model thinking. Without this, qwen3 / deepseek-r1
+        # / gpt-oss-style chat templates route the actual answer into a
+        # separate `thinking` field and leave `response` empty, which breaks
+        # every downstream caller that reads `response['response']`.
+        think=False,
     )
     result = response['response']
 
@@ -135,6 +140,10 @@ class OllamaLanguageModel(language_model.LanguageModel):
           options={'stop': (), 'temperature': temperature},
           format='json',
           keep_alive='10m',
+          # See sample_text above for the rationale. Without think=False
+          # qwen3-family models return an empty `response` because the
+          # JSON answer is routed to the `thinking` field.
+          think=False,
       )
       try:
         json_data_response = json.loads(response['response'])
