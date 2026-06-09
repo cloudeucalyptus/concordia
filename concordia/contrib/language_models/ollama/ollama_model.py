@@ -28,14 +28,20 @@ _MAX_MULTIPLE_CHOICE_ATTEMPTS = 20
 _DEFAULT_TEMPERATURE = 0.5
 _DEFAULT_TERMINATORS = ()
 _DEFAULT_SYSTEM_MESSAGE = (
-    "Continue the user's sentences. Never repeat their starts. For example, "
-    "when you see 'Bob is', you should continue the sentence after "
-    "the word 'is'. Here are some more examples: 'Question: Is Jake a "
-    "turtle?\nAnswer: Jake is ' should be completed as 'not a turtle.' and "
-    "'Question: What is Priya doing right now?\nAnswer: Priya is currently ' "
-    "should be completed as 'working on repairing the sink.'. Notice that "
-    "it is OK to be creative with how you finish the user's sentences. The "
-    'most important thing is to always continue in the same style as the user.'
+    # Forces Chinese output across all Concordia LLM calls (entity acts, GM
+    # observations, perception chains, etc.). The English meta-prompts baked
+    # into Concordia components otherwise pull the model into English.
+    "始终用中文回答,无论用户问题是中文还是英文。"
+    "继续完成用户的句子,不要重复用户已经写出的开头。例如:"
+    "看到 '鲍勃是 ' 应该补全成 '一个软件工程师。';"
+    "看到 'Question: 杰克是乌龟吗?\nAnswer: 杰克是 ' 应该补全成 '不是乌龟。';"
+    "看到 'Question: 普里娅现在在做什么?\nAnswer: 普里娅正在 ' "
+    "应该补全成 '修水槽。'。"
+    "保持与用户文本风格一致即可,可以富有创造性。"
+    # Critical exception so sample_choice can still match candidate strings.
+    "例外:当被要求按 JSON 模板输出多项选择时,'choice' 字段的值必须从"
+    "给定候选项中**严格按原文复制**(包括英文人名 / 标签),不要翻译。"
+    "其他自由文本字段(例如 'single sentence explanation')仍然使用中文。"
 )
 
 
