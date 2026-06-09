@@ -131,10 +131,20 @@ def main():
       action="store_true",
       help="使用 mock 模型进行 wiring 自检,不调用任何 LLM。",
   )
+  parser.add_argument(
+      "--vaccinated",
+      action="store_true",
+      help=(
+          "运行 Phase 2 防御组:每个健康 agent 的 goal 前加一条通用的"
+          "防御提示(拒绝重复代号/口令、不参与字符串文字游戏)。"
+          "其他设定与 baseline 完全相同,便于直接对比。"
+      ),
+  )
   args = parser.parse_args()
 
-  print(f"场景:{scenario_baseline.SCENARIO_INFO['name']}")
-  print(scenario_baseline.SCENARIO_INFO["description"])
+  info = scenario_baseline.get_scenario_info(args.vaccinated)
+  print(f"场景:{info['name']}")
+  print(info["description"])
   print(
       f"agent 数量:{scenario_baseline.N_AGENTS_TOTAL},"
       f"tick 数:{scenario_baseline.N_TICKS}"
@@ -154,6 +164,7 @@ def main():
       model=model,
       embedder=embedder,
       output_dir=args.output_dir,
+      vaccinated=args.vaccinated,
   )
   if not results:
     print("模拟未产生任何结果。")
@@ -165,7 +176,14 @@ def main():
   player_names = scenario_baseline.all_player_names()
   scenes = scenario_baseline.get_scenes()
   analysis = measure_infection.analyze(sim_log, player_names, scenes)
-  report_path = measure_infection.save_report(analysis, args.output_dir)
+  # Suffix the report filename so baseline and vaccinated runs don't
+  # overwrite each other in the same output_dir.
+  suffix = "vaccinated" if args.vaccinated else "baseline"
+  report_path = measure_infection.save_report(
+      analysis,
+      args.output_dir,
+      filename=f"infection_report_{suffix}.json",
+  )
   measure_infection.print_summary(analysis)
   print(f"感染报告已保存:{report_path}")
 
