@@ -96,6 +96,12 @@ def create_config() -> prefab_lib.Config:
   for healthy in payload.HEALTHY_AGENTS:
     player_specific_context[healthy["name"]] = healthy["context"]
 
+  # Skip the LLM-generated backstory step entirely: it's hardcoded English
+  # in Concordia upstream, and we don't need fictional childhood episodes —
+  # the explicit player_specific_memories (Chinese, hand-written) already
+  # carry the payload, and player_specific_context gives the agent a
+  # one-paragraph self-description. Shared memories and explicit player
+  # memories are still injected when this flag is set.
   instances.append(
       prefab_lib.InstanceConfig(
           prefab="formative_memories_initializer__GameMaster",
@@ -106,6 +112,7 @@ def create_config() -> prefab_lib.Config:
               "shared_memories": list(payload.SHARED_MEMORIES),
               "player_specific_context": player_specific_context,
               "player_specific_memories": player_specific_memories,
+              "skip_formative_memories_for": _all_player_names(),
           },
       )
   )
